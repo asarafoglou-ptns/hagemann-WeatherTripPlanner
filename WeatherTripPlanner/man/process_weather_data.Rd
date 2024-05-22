@@ -4,10 +4,20 @@
 \alias{process_weather_data}
 \title{Process Weather Data}
 \usage{
-process_weather_data(weather_data)
+process_weather_data(
+  location,
+  start_date = "2014-01-01",
+  end_date = as.character(lubridate::today())
+)
 }
 \arguments{
-\item{weather_data}{A list which is returned by the get_weather_data function.}
+\item{location}{A location in the format 'City/zip code, Country'.}
+
+\item{start_date}{The start date for the weather data in the format "YYYY-MM-DD".
+The default value is 2014-01-01}
+
+\item{end_date}{The end date for the weather data in the format "YYYY-MM-DD".
+The default value is today's date.}
 }
 \value{
 A data frame with the weather data for each day in the indicated
@@ -18,5 +28,6 @@ process_weather_data processes the data which was retrieved with the
 get_weather_data function and creates a new data frame with the daily weather data.
 }
 \examples{
-process_weather_data(weather_data)
+process_weather_data("Tokyo, Japan", "2024-03-03", "2024-03-15")
+process_weather_data("Amsterdam, Netherlands")
 }

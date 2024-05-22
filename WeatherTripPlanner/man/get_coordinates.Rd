@@ -7,7 +7,7 @@
 get_coordinates(location)
 }
 \arguments{
-\item{location}{A location in the format 'City, Country' (optional with zip code).}
+\item{location}{A location in the format 'City/zip code, Country'.}
 }
 \value{
 A list with the coordinates (latitude and longitude) of the given location.
@@ -19,6 +19,7 @@ get_coordinates is used to get the latitude and longitude of any location
 given as input when calling the function.
 }
 \examples{
-get_coordinates()
-# Enter a location (City, Country): Amsterdam, Netherlands
+get_coordinates("Amsterdam, Netherlands")
+get_coordinates("Berlin, Germany")
+get_coordinates("5020, Austria")
 }

@@ -5,20 +5,19 @@
 \title{Get Weather Data}
 \usage{
 get_weather_data(
-  latitude = latitude,
-  longitude = longitude,
-  start_date = start_date,
-  end_date = end_date
+  location,
+  start_date = "2014-01-01",
+  end_date = as.character(lubridate::today())
 )
 }
 \arguments{
-\item{latitude}{The latitude of the location.}
+\item{location}{A location in the format 'City/zip code, Country'.}
 
-\item{longitude}{The longitude of the location.}
+\item{start_date}{The start date for the weather data in the format "YYYY-MM-DD".
+The default value is 2014-01-01}
 
-\item{start_date}{The start date for the weather data in the format "YYYY-MM-DD".}
-
-\item{end_date}{The end date for the weather data in the format "YYYY-MM-DD".}
+\item{end_date}{The end date for the weather data in the format "YYYY-MM-DD".
+The default value is today's date.}
 }
 \value{
 The parsed weather data as a list.
@@ -28,6 +27,8 @@ get_weather_data is used to retrieve historical weather data from the
 Open-Meteo API for a specific location and date range.
 }
 \examples{
-get_weather_data()
-# Enter a location (City, Country): Linz, Austria
+get_weather_data("Amsterdam, Netherlands", "2014-01-01", "2014-01-02")
+get_weather_data("Amsterdam, Netherlands")
+get_weather_data("Tokyo, Japan", "2024-03-03", "2024-03-15")
+get_weather_data("Tokyo, Japan")
 }

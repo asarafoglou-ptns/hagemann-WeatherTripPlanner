@@ -1,16 +1,19 @@
 # functions for weather trip planner
 
+# rewrite: arguments instead of input function! 
+
 #' @title Get Coordinates
 #' @description 
 #' get_coordinates is used to get the latitude and longitude of any location 
 #' given as input when calling the function.
-#' @param location A location in the format 'City, Country' (optional with zip code).
+#' @param location A location in the format 'City/zip code, Country'.
 #' @return A list with the coordinates (latitude and longitude) of the given location.
 #' The keys of the list are "latitude" and "longitude", and their respective values 
 #' are the latitude and longitude coordinates extracted from the API response.
 #' @examples
-#' get_coordinates()
-#' # Enter a location (City, Country): Amsterdam, Netherlands
+#' get_coordinates("Amsterdam, Netherlands")
+#' get_coordinates("Berlin, Germany")
+#' get_coordinates("5020, Austria")
 #' @export
 get_coordinates <- function(location) {
   
@@ -43,36 +46,35 @@ get_coordinates <- function(location) {
   return(list(latitude = latitude, longitude = longitude))
 }
 
-# location <- readline(prompt = "Enter a location (City, Country): ")
-# coordinates <- get_coordinates(location)
-
 #' @title Get Weather Data
 #' @description 
 #' get_weather_data is used to retrieve historical weather data from the 
 #' Open-Meteo API for a specific location and date range.
-#' @param latitude The latitude of the location.
-#' @param longitude The longitude of the location.
+#' @param location A location in the format 'City/zip code, Country'.
 #' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
+#' The default value is 2014-01-01
 #' @param end_date The end date for the weather data in the format "YYYY-MM-DD".
+#' The default value is today's date. 
 #' @return The parsed weather data as a list.
 #' @examples
-#' get_weather_data()
-#' # Enter a location (City, Country): Linz, Austria
+#' get_weather_data("Amsterdam, Netherlands", "2014-01-01", "2014-01-02")
+#' get_weather_data("Amsterdam, Netherlands")
+#' get_weather_data("Tokyo, Japan", "2024-03-03", "2024-03-15")
+#' get_weather_data("Tokyo, Japan")
 #' @export
-get_weather_data <- function(latitude = latitude, 
-                             longitude = longitude, 
-                             start_date = start_date, 
-                             end_date = end_date) {
+get_weather_data <- function(location,  
+                             start_date = "2014-01-01", 
+                             end_date = as.character(lubridate::today())) {
   
   api_url <- "https://archive-api.open-meteo.com/v1/archive"
   
-  # coordinates <- get_coordinates(location)
+  coordinates <- get_coordinates(location)
   
   params <- list(
-    latitude = 48.30591, # coordinates$latitude
-    longitude = 14.2862, # coordinates$longitude
-    start_date = "2014-01-01",
-    end_date = as.character(lubridate::today()),
+    latitude = coordinates$latitude,
+    longitude = coordinates$longitude,
+    start_date = start_date,
+    end_date = end_date,
     daily = paste(c("weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean", "daylight_duration", "sunshine_duration", "precipitation_sum", "rain_sum", "snowfall_sum", "precipitation_hours", "wind_speed_10m_max"), collapse = ",")
   )
   
@@ -85,27 +87,32 @@ get_weather_data <- function(latitude = latitude,
   
   # Parse the JSON content
   content <- httr::content(res, "text", encoding = "UTF-8")
-  data <- jsonlite::fromJSON(content, flatten = TRUE)
+  weather_data <- jsonlite::fromJSON(content, flatten = TRUE)
   
-  return(data)
+  return(weather_data)
 }
-
-# weather_data <- get_weather_data(latitude, longitude, start_date, end_date)
 
 
 #' @title Process Weather Data
 #' @description 
 #' process_weather_data processes the data which was retrieved with the 
 #' get_weather_data function and creates a new data frame with the daily weather data.
-#' @param weather_data A list which is returned by the get_weather_data function.
+#' @param location A location in the format 'City/zip code, Country'.
+#' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
+#' The default value is 2014-01-01
+#' @param end_date The end date for the weather data in the format "YYYY-MM-DD".
+#' The default value is today's date. 
 #' @return A data frame with the weather data for each day in the indicated
 #' time period at the gven location.
 #' @examples
-#' process_weather_data(weather_data)
+#' process_weather_data("Tokyo, Japan", "2024-03-03", "2024-03-15")
+#' process_weather_data("Amsterdam, Netherlands")
 #' @export
-process_weather_data <- function(weather_data) {
+process_weather_data <- function(location,  
+                                 start_date = "2014-01-01", 
+                                 end_date = as.character(lubridate::today())) {
   
-  weather_data <- get_weather_data(latitude, longitude, start_date, end_date)
+  weather_data <- get_weather_data(location, start_date, end_date)
   
   daily <- weather_data$daily
   
@@ -116,9 +123,9 @@ process_weather_data <- function(weather_data) {
       by = "day"
     )[1:length(daily$weather_code)], 
     weather_code = daily$weather_code,
-    temperature_2m_max = daily$temperature_2m_max,
-    temperature_2m_min = daily$temperature_2m_min,
-    temperature_2m_mean = daily$temperature_2m_mean,
+    temperature_max = daily$temperature_2m_max,
+    temperature_min = daily$temperature_2m_min,
+    temperature_mean = daily$temperature_2m_mean,
     daylight_duration = daily$daylight_duration,
     sunshine_duration = daily$sunshine_duration,
     precipitation_sum = daily$precipitation_sum,
@@ -129,6 +136,3 @@ process_weather_data <- function(weather_data) {
   )
   return(daily_data)
 }
-
-processed_data <- process_weather_data(weather_data)
-processed_data
