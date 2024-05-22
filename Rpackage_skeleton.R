@@ -12,7 +12,7 @@ library(usethis)
 
 devtools::create("WeatherTripPlanner")
 
-setwd("/Users/JasminHagemann/Desktop/GitHub/hagemann-WeatherTripPlanner/WeatherTripPlanner/R")
+setwd("/Users/JasminHagemann/Desktop/GitHub/hagemann-WeatherTripPlanner/WeatherTripPlanner")
 
 usethis::use_ccby_license()
 

@@ -1,7 +1,5 @@
 # functions for weather trip planner
 
-# rewrite: arguments instead of input function! 
-
 #' @title Get Coordinates
 #' @description 
 #' get_coordinates is used to get the latitude and longitude of any location 
@@ -19,7 +17,7 @@ get_coordinates <- function(location) {
   
   api_key <- "f64ebf508b21463287ef1fc29cbaf119"
   base_url <- "https://api.opencagedata.com/geocode/v1/json"
-  query <- URLencode(location)
+  query <- utils::URLencode(location)
   request_url <- paste0(base_url, "?q=", query, "&key=", api_key)
   
   response <- httr::GET(request_url)
@@ -29,7 +27,7 @@ get_coordinates <- function(location) {
     stop("Failed to retrieve data. Please check the location and try again.")
   }
   
-  data <- jsonlite::fromJSON(content(response, as = "text"))
+  data <- jsonlite::fromJSON(httr::content(response, as = "text"))
   
   # Check if there are results
   if (length(data$results) == 0) {
