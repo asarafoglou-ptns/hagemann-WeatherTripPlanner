@@ -1,6 +1,5 @@
 # R package skeleton 
 
-setwd("/Users/JasminHagemann/Desktop/UvA/classes/year 1/semester 2/PTNS")
 rm(list = ls())
 
 install.packages('devtools')

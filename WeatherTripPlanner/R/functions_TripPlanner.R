@@ -52,7 +52,7 @@ get_coordinates <- function(location) {
 #' Open-Meteo API for a specific location and date range.
 #' @param location A location in the format 'City/zip code, Country'.
 #' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
-#' The default value is 2014-01-01
+#' The default value is 2014-01-01.
 #' @param end_date The end date for the weather data in the format "YYYY-MM-DD".
 #' The default value is today's date. 
 #' @return The parsed weather data as a list.
@@ -99,11 +99,11 @@ get_weather_data <- function(location,
 #' get_weather_data function and creates a new data frame with the daily weather data.
 #' @param location A location in the format 'City/zip code, Country'.
 #' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
-#' The default value is 2014-01-01
+#' The default value is 2014-01-01.
 #' @param end_date The end date for the weather data in the format "YYYY-MM-DD".
 #' The default value is today's date. 
 #' @return A data frame with the weather data for each day in the indicated
-#' time period at the gven location.
+#' time period at the given location.
 #' @examples
 #' process_weather_data("Tokyo, Japan", "2024-03-03", "2024-03-15")
 #' process_weather_data("Amsterdam, Netherlands")

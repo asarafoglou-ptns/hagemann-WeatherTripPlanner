@@ -14,14 +14,14 @@ process_weather_data(
 \item{location}{A location in the format 'City/zip code, Country'.}
 
 \item{start_date}{The start date for the weather data in the format "YYYY-MM-DD".
-The default value is 2014-01-01}
+The default value is 2014-01-01.}
 
 \item{end_date}{The end date for the weather data in the format "YYYY-MM-DD".
 The default value is today's date.}
 }
 \value{
 A data frame with the weather data for each day in the indicated
-time period at the gven location.
+time period at the given location.
 }
 \description{
 process_weather_data processes the data which was retrieved with the
