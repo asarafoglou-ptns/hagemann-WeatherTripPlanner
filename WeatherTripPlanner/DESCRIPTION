@@ -1,0 +1,17 @@
+Package: WeatherTripPlanner
+Title: Weather Statistics for Trip Planning 
+Version: 0.0.0.9000
+Authors@R: 
+    person("Jasmin", "Hagemann", , "jasmin.hagemann@student.uva.nl", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: The package provides the user with weather statistics for a specific 
+              location or at a specific time, depedinging on the user's perferences.
+License: CC BY 4.0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    httr,
+    jsonlite,
+    lubridate,
+    dplyr
