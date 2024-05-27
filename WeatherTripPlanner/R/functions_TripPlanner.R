@@ -40,6 +40,7 @@ get_coordinates <- function(location) {
   return(list(latitude = latitude, longitude = longitude))
 }
 
+
 #' @title Get Weather Data
 #' @description 
 #' get_weather_data is used to retrieve historical weather data from the 
@@ -130,6 +131,7 @@ process_weather_data <- function(location,
   )
   return(daily_data)
 }
+
 
 #' @title Filter Weather Data 
 #' @description filter_by_season filters a data frame by the indicated season. 
@@ -239,7 +241,6 @@ rank_intervals_temp <- function(num_days,
   
   intervals <- generate_intervals(num_days, location, start_date, end_date, season) 
   
-  # Calculate mean temperature for each interval
   mean_temperatures <- sapply(intervals, function(interval) mean(interval$temperature_mean))
   
   # Rank intervals based on mean temperature
@@ -275,7 +276,6 @@ rank_intervals_precip <- function(num_days,
   
   intervals <- generate_intervals(num_days, location, start_date, end_date, season) 
   
-  # Calculate total precipitation, snow, and rain for each interval
   total_precip <- sapply(intervals, function(interval) sum(interval$precipitation_sum))
   total_snow <- sapply(intervals, function(interval) sum(interval$snowfall_sum))
   total_rain <- sapply(intervals, function(interval) sum(interval$rain_sum))
@@ -292,4 +292,5 @@ rank_intervals_precip <- function(num_days,
   }
   
   return(ranked_intervals)
+
 }
