@@ -1,3 +1,5 @@
+# backup
+
 # functions for weather trip planner
 
 #' @title Get Coordinates
@@ -34,16 +36,11 @@ get_coordinates <- function(location) {
     stop("No results found for the given location.")
   }
   
-  latitude <- data$results$geometry$lat
-  longitude <- data$results$geometry$lng
-  
-  # Check: print extracted coordinates
-  # cat("Latitude:", latitude, "\n")
-  # cat("Longitude:", longitude, "\n")
+  latitude <- data$results$geometry$lat[1]
+  longitude <- data$results$geometry$lng[1]
   
   return(list(latitude = latitude, longitude = longitude))
 }
-
 
 #' @title Get Weather Data
 #' @description 
@@ -117,8 +114,8 @@ process_weather_data <- function(location,
   
   daily_data <- data.frame(
     date = seq(
-      as.Date("2014-01-01"),
-      lubridate::today(),
+      as.Date(start_date),
+      as.Date(end_date),
       by = "day"
     )[1:length(daily$weather_code)], 
     weather_code = daily$weather_code,
@@ -135,7 +132,6 @@ process_weather_data <- function(location,
   )
   return(daily_data)
 }
-
 
 #' @title Filter Weather Data 
 #' @description filter_by_season filters a data frame by the indicated season. 
@@ -245,6 +241,7 @@ rank_intervals_temp <- function(num_days,
   
   intervals <- generate_intervals(num_days, location, start_date, end_date, season) 
   
+  # Calculate mean temperature for each interval
   mean_temperatures <- sapply(intervals, function(interval) mean(interval$temperature_mean))
   
   # Rank intervals based on mean temperature
@@ -280,6 +277,7 @@ rank_intervals_precip <- function(num_days,
   
   intervals <- generate_intervals(num_days, location, start_date, end_date, season) 
   
+  # Calculate total precipitation, snow, and rain for each interval
   total_precip <- sapply(intervals, function(interval) sum(interval$precipitation_sum))
   total_snow <- sapply(intervals, function(interval) sum(interval$snowfall_sum))
   total_rain <- sapply(intervals, function(interval) sum(interval$rain_sum))
