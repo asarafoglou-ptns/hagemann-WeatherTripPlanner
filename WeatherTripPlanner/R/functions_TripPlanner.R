@@ -44,6 +44,7 @@ get_coordinates <- function(location) {
   return(list(latitude = latitude, longitude = longitude))
 }
 
+
 #' @title Get Weather Data
 #' @description 
 #' get_weather_data is used to retrieve historical weather data from the 
@@ -133,4 +134,166 @@ process_weather_data <- function(location,
     wind_speed_10m_max = daily$wind_speed_10m_max
   )
   return(daily_data)
+}
+
+
+#' @title Filter Weather Data 
+#' @description filter_by_season filters a data frame by the indicated season. 
+#' @param location A location in the format 'City/zip code, Country'.
+#' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
+#' The default value is 2014-01-01.
+#' @param end_date The end date for the weather data in the format "YYYY-MM-DD".
+#' The default value is today's date. 
+#' @param season A season (winter, spring, summer, fall).
+#' @return a filtered data frame containing the original data for all of the months
+#' of the indicated season. 
+#' @examples
+#' filter_by_season("Munich, Germany", "2023-01-10", "2024-05-15", "spring")
+#' filter_by_season("Leiden, Netherlands", season = "summer")
+#' filter_by_season("08001, Spain", season = "winter")
+#' @export
+filter_by_season <- function(location,  
+                             start_date = "2014-01-01", 
+                             end_date = as.character(lubridate::today()), 
+                             season) {
+  
+  df <- process_weather_data(location, start_date, end_date)
+  
+  # Ensure the first column is in Date format
+  if (!inherits(df[[1]], "Date")) {
+    df[[1]] <- as.Date(df[[1]], format = "%Y-%m-%d")
+  }
+  
+  # Extract the month from the date
+  df$Month <- format(df[[1]], "%m")
+  
+  # Define the months for each season
+  seasons <- list(
+    Winter = c("12", "01", "02"),
+    Spring = c("03", "04", "05"),
+    Summer = c("06", "07", "08"),
+    Fall = c("09", "10", "11")
+  )
+  
+  # Check if the input season is valid
+  if (!season %in% names(seasons)) {
+    stop("Invalid season. Choose from 'winter', 'spring', 'summer', or 'fall'.")
+  }
+  
+  # Filter the dataframe for the given season
+  filtered_df <- df[df$Month %in% seasons[[season]], ]
+  
+  # Drop the Month column before returning the filtered dataframe
+  filtered_df$Month <- NULL
+  
+  return(filtered_df)
+}
+
+
+#' @title Consecutive Day Intervals with Average Weather Parameters
+#' @description generate_intervals creates all possible intervals of 
+#' consecutive days based on the specified number of days. The intervals contain 
+#' the averages of the weather parameters for all days of the months in the indicated season. 
+#' @param num_days The number of consecutive days in each interval.
+#' @param location A location in the format 'City/zip code, Country'.
+#' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
+#' The default value is 2014-01-01.
+#' @param end_date The end date for the weather data in the format "YYYY-MM-DD".
+#' The default value is today's date. 
+#' @param season A season (winter, spring, summer, fall).
+#' @return A data frame containing all possible intervals of consecutive days 
+#' with the average weather parameters.
+#' @examples
+#' generate_intervals(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring")
+#' generate_intervals(7, "Leiden, Netherlands", season = "summer")
+#' generate_intervals(3, "08001, Spain", season = "winter")
+#' @export
+generate_intervals <- function(num_days,
+                               location, 
+                               start_date = "2014-01-01", 
+                               end_date = as.character(lubridate::today()), 
+                               season) {
+  
+  # Filter the weather data for the specified season
+  filtered_df <- filter_by_season(location, start_date, end_date, season)
+  
+  # Remove the year information from the date column
+  filtered_df$date <- format(filtered_df$date, "%m-%d")
+  
+  # Create all possible intervals of consecutive days
+  all_intervals <- lapply(1:(nrow(filtered_df) - num_days + 1), function(i) filtered_df[i:(i + num_days - 1), ])
+  
+  return(all_intervals)
+}
+
+
+#' @title Rank Intervals by Temperature
+#' @description rank_intervals_temp ranks the intervals based on temperature preference.
+#' @param intervals A list of data frames containing intervals of consecutive days with weather data.
+#' @param temp_pref The ranking criteria: "warm" to rank by highest temperature or "cold" to rank by lowest temperature.
+#' @return A list of ranked intervals based on temperature criteria.
+#' @examples
+#' rank_intervals_temp(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring", "warm")
+#' rank_intervals_temp(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "winter", "cold")
+#' rank_intervals_temp(7, "Milan, Italy", "2024-01-01", "2024-03-01", "winter", "cold")
+rank_intervals_temp <- function(num_days, 
+                                location, 
+                                start_date = "2014-01-01", 
+                                end_date = as.character(lubridate::today()), 
+                                season,
+                                temp_pref) {
+  
+  intervals <- generate_intervals(num_days, location, start_date, end_date, season) 
+  
+  mean_temperatures <- sapply(intervals, function(interval) mean(interval$temperature_mean))
+  
+  # Rank intervals based on mean temperature
+  if (temp_pref == "warm") {
+    ranked_intervals <- intervals[order(mean_temperatures, decreasing = TRUE)]
+  } else if (temp_pref == "cold") {
+    ranked_intervals <- intervals[order(mean_temperatures)]
+  } else {
+    stop("Invalid rank criteria. Choose from 'warm' or 'cold'.")
+  }
+  
+  return(ranked_intervals)
+}
+
+
+#' @title Rank Intervals by Precipitation
+#' @description rank_intervals_temp first calculates the total precipitation, 
+#' snowfall, and rain for each interval. It then ranks the intervals based on 
+#' the specified precipitation preference ("none", "snow", or "rain")
+#' @param intervals A list of data frames containing intervals of consecutive days with weather data.
+#' @param precip_pref The ranking criteria: "none", "snow", or "rain".
+#' @return A list of ranked intervals based on the precipitation preference.
+#' @examples
+#' rank_intervals_precip(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring", "none")
+#' rank_intervals_precip(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "winter", "snow")
+#' rank_intervals_precip(7, "Milan, Italy", "2024-01-01", "2024-03-01", "winter", "rain")
+rank_intervals_precip <- function(num_days, 
+                                  location, 
+                                  start_date = "2014-01-01", 
+                                  end_date = as.character(lubridate::today()), 
+                                  season,
+                                  precip_pref) {
+  
+  intervals <- generate_intervals(num_days, location, start_date, end_date, season) 
+  
+  total_precip <- sapply(intervals, function(interval) sum(interval$precipitation_sum))
+  total_snow <- sapply(intervals, function(interval) sum(interval$snowfall_sum))
+  total_rain <- sapply(intervals, function(interval) sum(interval$rain_sum))
+  
+  # Rank intervals based on precipitation preference
+  if (precip_pref == "none") {
+    ranked_intervals <- intervals[order(total_precip)]
+  } else if (precip_pref == "snow") {
+    ranked_intervals <- intervals[order(total_snow, decreasing = TRUE)]
+  } else if (precip_pref == "rain") {
+    ranked_intervals <- intervals[order(total_rain, decreasing = TRUE)]
+  } else {
+    stop("Invalid precipitation preference. Choose from 'none', 'snow', or 'rain'.")
+  }
+  
+  return(ranked_intervals)
 }
