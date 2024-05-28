@@ -30,7 +30,7 @@ of the indicated season.
 filter_by_season filters a data frame by the indicated season.
 }
 \examples{
-filter_by_season("Munich, Germany", "2023-01-10", "2024-05-15", "spring")
-filter_by_season("Leiden, Netherlands", season = "summer")
-filter_by_season("08001, Spain", season = "winter")
+filter_by_season("Munich, Germany", "2023-01-10", "2024-05-15", "Spring")
+filter_by_season("Leiden, Netherlands", season = "Summer")
+filter_by_season("08001, Spain", season = "Winter")
 }

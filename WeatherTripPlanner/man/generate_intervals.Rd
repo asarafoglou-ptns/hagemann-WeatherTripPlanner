@@ -35,7 +35,7 @@ consecutive days based on the specified number of days. The intervals contain
 the averages of the weather parameters for all days of the months in the indicated season.
 }
 \examples{
-generate_intervals(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring")
-generate_intervals(7, "Leiden, Netherlands", season = "summer")
-generate_intervals(3, "08001, Spain", season = "winter")
+generate_intervals(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring")
+generate_intervals(7, "Leiden, Netherlands", season = "Summer")
+generate_intervals(3, "08001, Spain", season = "Winter")
 }
