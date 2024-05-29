@@ -181,7 +181,8 @@ filter_by_season <- function(location,
 #' @title Consecutive Day Intervals with Average Weather Parameters
 #' @description generate_intervals creates all possible intervals of 
 #' consecutive days based on the specified number of days. The intervals contain 
-#' the averages of the weather parameters for all days of the months in the indicated season. 
+#' the averages of the weather parameters for all days of the months in the 
+#' indicated season over the years.
 #' @param num_days The number of consecutive days in each interval.
 #' @param location A location in the format 'City/zip code, Country'.
 #' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
@@ -203,8 +204,13 @@ generate_intervals <- function(num_days,
                                season) {
   
   filtered_df <- filter_by_season(location, start_date, end_date, season)
-  filtered_df$date <- format(filtered_df$date, "%m-%d")
-  all_intervals <- lapply(1:(nrow(filtered_df) - num_days + 1), function(i) filtered_df[i:(i + num_days - 1), ])
+  filtered_df$date <- format(as.Date(filtered_df$date), "%m-%d")
+  average_df <- dplyr::group_by(filtered_df, date)
+  average_df <- dplyr::summarise(average_df, dplyr::across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
+  
+  if (nrow(average_df) < num_days) return(list())
+  
+  all_intervals <- lapply(1:(nrow(average_df) - num_days + 1), function(i) average_df[i:(i + num_days - 1), ])
   
   return(all_intervals)
 }
@@ -278,4 +284,3 @@ rank_intervals_precip <- function(num_days,
   
   return(ranked_intervals)
 }
-

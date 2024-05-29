@@ -126,9 +126,6 @@ server <- function(input, output, session) {
       })
     }
     
-    # the comparison plots are still under construction
-    # check x axis labeling!!!
-    
     output$comparison <- renderPlot({
       selected_params <- input$compare_params
       
@@ -151,19 +148,18 @@ server <- function(input, output, session) {
       }))
       
       comparison_data <- data.frame(comparison_data)
-      colnames(comparison_data) <- readable_params
-      comparison_data$Period <- paste0("Period ", 1:3)
-      
-      comparison_data_long <- reshape2::melt(comparison_data, id.vars = "Period")
+      colnames(comparison_data) <- selected_params
+      comparison_data$Period <- paste0("Period ", 1:nrow(comparison_data))
+      comparison_data_long <- tidyr::pivot_longer(comparison_data, cols = -Period, names_to = "variable", values_to = "value")
+      comparison_data_long$variable <- factor(comparison_data_long$variable, levels = selected_params, labels = readable_params)
       
       ggplot2::ggplot(comparison_data_long, aes(x = variable, y = value, fill = Period)) +
         ggplot2::geom_bar(stat = "identity", position = "dodge") +
-        ggplot2::labs(y = "Value", fill = "Period") +  
+        ggplot2::labs(x = "Weather Parameter", y = "Value", fill = "Period") +  
         ggplot2::theme(
           axis.text.x = ggplot2::element_text(size = 14, angle = 45, hjust = 1),
           axis.text.y = ggplot2::element_text(size = 14) 
-        ) +
-        ggplot2::scale_x_discrete(labels = function(x) label_mapping[x], breaks = names(label_mapping))
+        )
     })
   })
 }

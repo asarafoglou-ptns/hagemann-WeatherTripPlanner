@@ -32,7 +32,8 @@ with the average weather parameters.
 \description{
 generate_intervals creates all possible intervals of
 consecutive days based on the specified number of days. The intervals contain
-the averages of the weather parameters for all days of the months in the indicated season.
+the averages of the weather parameters for all days of the months in the
+indicated season over the years.
 }
 \examples{
 generate_intervals(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring")
