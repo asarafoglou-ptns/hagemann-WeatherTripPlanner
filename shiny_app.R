@@ -135,7 +135,7 @@ server <- function(input, output, session) {
       comparison_data_long <- tidyr::pivot_longer(comparison_data, cols = -Period, names_to = "variable", values_to = "value")
       comparison_data_long$variable <- factor(comparison_data_long$variable, levels = selected_params, labels = readable_params)
       
-      ggplot2::ggplot(comparison_data_long, aes(x = variable, y = value, fill = Period)) +
+      ggplot2::ggplot(comparison_data_long, ggplot2::aes(x = variable, y = value, fill = Period)) +
         ggplot2::geom_bar(stat = "identity", position = "dodge") +
         ggplot2::labs(x = "Weather Parameter", y = "Value", fill = "Period") +  
         ggplot2::theme(
