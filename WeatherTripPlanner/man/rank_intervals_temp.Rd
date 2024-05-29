@@ -25,7 +25,7 @@ A list of ranked intervals based on temperature criteria.
 rank_intervals_temp ranks the intervals based on temperature preference.
 }
 \examples{
-rank_intervals_temp(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring", "warm")
-rank_intervals_temp(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "winter", "cold")
-rank_intervals_temp(7, "Milan, Italy", "2024-01-01", "2024-03-01", "winter", "cold")
+rank_intervals_temp(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring", "warm")
+rank_intervals_temp(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "Winter", "cold")
+rank_intervals_temp(7, "Milan, Italy", "2024-01-01", "2024-03-01", "Winter", "cold")
 }

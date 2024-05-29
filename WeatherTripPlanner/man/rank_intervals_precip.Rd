@@ -27,7 +27,7 @@ snowfall, and rain for each interval. It then ranks the intervals based on
 the specified precipitation preference ("none", "snow", or "rain")
 }
 \examples{
-rank_intervals_precip(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring", "none")
-rank_intervals_precip(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "winter", "snow")
-rank_intervals_precip(7, "Milan, Italy", "2024-01-01", "2024-03-01", "winter", "rain")
+rank_intervals_precip(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring", "none")
+rank_intervals_precip(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "Winter", "snow")
+rank_intervals_precip(7, "Milan, Italy", "2024-01-01", "2024-03-01", "Winter", "rain")
 }

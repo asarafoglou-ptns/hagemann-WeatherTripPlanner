@@ -5,7 +5,9 @@ Authors@R:
     person("Jasmin", "Hagemann", , "jasmin.hagemann@student.uva.nl", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: The package provides the user with weather statistics for a specific 
-              location or at a specific time, depedinging on the user's perferences.
+              location. It will rank different time periods according to the 
+              user's temperature or precipitation preferences and display the
+              weather parameters for the entered location at the selected times.
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -34,16 +34,11 @@ get_coordinates <- function(location) {
     stop("No results found for the given location.")
   }
   
-  latitude <- data$results$geometry$lat
-  longitude <- data$results$geometry$lng
-  
-  # Check: print extracted coordinates
-  # cat("Latitude:", latitude, "\n")
-  # cat("Longitude:", longitude, "\n")
+  latitude <- data$results$geometry$lat[1]
+  longitude <- data$results$geometry$lng[1]
   
   return(list(latitude = latitude, longitude = longitude))
 }
-
 
 #' @title Get Weather Data
 #' @description 
@@ -84,7 +79,6 @@ get_weather_data <- function(location,
     stop("Failed to fetch data. Status code: ", httr::status_code(res))
   }
   
-  # Parse the JSON content
   content <- httr::content(res, "text", encoding = "UTF-8")
   weather_data <- jsonlite::fromJSON(content, flatten = TRUE)
   
@@ -117,8 +111,8 @@ process_weather_data <- function(location,
   
   daily_data <- data.frame(
     date = seq(
-      as.Date("2014-01-01"),
-      lubridate::today(),
+      as.Date(start_date),
+      as.Date(end_date),
       by = "day"
     )[1:length(daily$weather_code)], 
     weather_code = daily$weather_code,
@@ -148,9 +142,9 @@ process_weather_data <- function(location,
 #' @return a filtered data frame containing the original data for all of the months
 #' of the indicated season. 
 #' @examples
-#' filter_by_season("Munich, Germany", "2023-01-10", "2024-05-15", "spring")
-#' filter_by_season("Leiden, Netherlands", season = "summer")
-#' filter_by_season("08001, Spain", season = "winter")
+#' filter_by_season("Munich, Germany", "2023-01-10", "2024-05-15", "Spring")
+#' filter_by_season("Leiden, Netherlands", season = "Summer")
+#' filter_by_season("08001, Spain", season = "Winter")
 #' @export
 filter_by_season <- function(location,  
                              start_date = "2014-01-01", 
@@ -159,15 +153,12 @@ filter_by_season <- function(location,
   
   df <- process_weather_data(location, start_date, end_date)
   
-  # Ensure the first column is in Date format
   if (!inherits(df[[1]], "Date")) {
     df[[1]] <- as.Date(df[[1]], format = "%Y-%m-%d")
   }
   
-  # Extract the month from the date
   df$Month <- format(df[[1]], "%m")
   
-  # Define the months for each season
   seasons <- list(
     Winter = c("12", "01", "02"),
     Spring = c("03", "04", "05"),
@@ -177,13 +168,10 @@ filter_by_season <- function(location,
   
   # Check if the input season is valid
   if (!season %in% names(seasons)) {
-    stop("Invalid season. Choose from 'winter', 'spring', 'summer', or 'fall'.")
+    stop("Invalid season. Choose from 'Winter', 'Spring', 'Summer', or 'Fall'.")
   }
   
-  # Filter the dataframe for the given season
   filtered_df <- df[df$Month %in% seasons[[season]], ]
-  
-  # Drop the Month column before returning the filtered dataframe
   filtered_df$Month <- NULL
   
   return(filtered_df)
@@ -193,7 +181,8 @@ filter_by_season <- function(location,
 #' @title Consecutive Day Intervals with Average Weather Parameters
 #' @description generate_intervals creates all possible intervals of 
 #' consecutive days based on the specified number of days. The intervals contain 
-#' the averages of the weather parameters for all days of the months in the indicated season. 
+#' the averages of the weather parameters for all days of the months in the 
+#' indicated season over the years.
 #' @param num_days The number of consecutive days in each interval.
 #' @param location A location in the format 'City/zip code, Country'.
 #' @param start_date The start date for the weather data in the format "YYYY-MM-DD".
@@ -204,9 +193,9 @@ filter_by_season <- function(location,
 #' @return A data frame containing all possible intervals of consecutive days 
 #' with the average weather parameters.
 #' @examples
-#' generate_intervals(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring")
-#' generate_intervals(7, "Leiden, Netherlands", season = "summer")
-#' generate_intervals(3, "08001, Spain", season = "winter")
+#' generate_intervals(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring")
+#' generate_intervals(7, "Leiden, Netherlands", season = "Summer")
+#' generate_intervals(3, "08001, Spain", season = "Winter")
 #' @export
 generate_intervals <- function(num_days,
                                location, 
@@ -214,14 +203,14 @@ generate_intervals <- function(num_days,
                                end_date = as.character(lubridate::today()), 
                                season) {
   
-  # Filter the weather data for the specified season
   filtered_df <- filter_by_season(location, start_date, end_date, season)
+  filtered_df$date <- format(as.Date(filtered_df$date), "%m-%d")
+  average_df <- dplyr::group_by(filtered_df, date)
+  average_df <- dplyr::summarise(average_df, dplyr::across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
   
-  # Remove the year information from the date column
-  filtered_df$date <- format(filtered_df$date, "%m-%d")
+  if (nrow(average_df) < num_days) return(list())
   
-  # Create all possible intervals of consecutive days
-  all_intervals <- lapply(1:(nrow(filtered_df) - num_days + 1), function(i) filtered_df[i:(i + num_days - 1), ])
+  all_intervals <- lapply(1:(nrow(average_df) - num_days + 1), function(i) average_df[i:(i + num_days - 1), ])
   
   return(all_intervals)
 }
@@ -233,9 +222,10 @@ generate_intervals <- function(num_days,
 #' @param temp_pref The ranking criteria: "warm" to rank by highest temperature or "cold" to rank by lowest temperature.
 #' @return A list of ranked intervals based on temperature criteria.
 #' @examples
-#' rank_intervals_temp(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring", "warm")
-#' rank_intervals_temp(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "winter", "cold")
-#' rank_intervals_temp(7, "Milan, Italy", "2024-01-01", "2024-03-01", "winter", "cold")
+#' rank_intervals_temp(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring", "warm")
+#' rank_intervals_temp(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "Winter", "cold")
+#' rank_intervals_temp(7, "Milan, Italy", "2024-01-01", "2024-03-01", "Winter", "cold")
+#' @export
 rank_intervals_temp <- function(num_days, 
                                 location, 
                                 start_date = "2014-01-01", 
@@ -247,7 +237,6 @@ rank_intervals_temp <- function(num_days,
   
   mean_temperatures <- sapply(intervals, function(interval) mean(interval$temperature_mean))
   
-  # Rank intervals based on mean temperature
   if (temp_pref == "warm") {
     ranked_intervals <- intervals[order(mean_temperatures, decreasing = TRUE)]
   } else if (temp_pref == "cold") {
@@ -268,9 +257,10 @@ rank_intervals_temp <- function(num_days,
 #' @param precip_pref The ranking criteria: "none", "snow", or "rain".
 #' @return A list of ranked intervals based on the precipitation preference.
 #' @examples
-#' rank_intervals_precip(5, "Munich, Germany", "2023-01-10", "2024-05-15", "spring", "none")
-#' rank_intervals_precip(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "winter", "snow")
-#' rank_intervals_precip(7, "Milan, Italy", "2024-01-01", "2024-03-01", "winter", "rain")
+#' rank_intervals_precip(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring", "none")
+#' rank_intervals_precip(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "Winter", "snow")
+#' rank_intervals_precip(7, "Milan, Italy", "2024-01-01", "2024-03-01", "Winter", "rain")
+#' @export
 rank_intervals_precip <- function(num_days, 
                                   location, 
                                   start_date = "2014-01-01", 
@@ -284,7 +274,6 @@ rank_intervals_precip <- function(num_days,
   total_snow <- sapply(intervals, function(interval) sum(interval$snowfall_sum))
   total_rain <- sapply(intervals, function(interval) sum(interval$rain_sum))
   
-  # Rank intervals based on precipitation preference
   if (precip_pref == "none") {
     ranked_intervals <- intervals[order(total_precip)]
   } else if (precip_pref == "snow") {
@@ -296,4 +285,22 @@ rank_intervals_precip <- function(num_days,
   }
   
   return(ranked_intervals)
+}
+
+
+# helper function for UI for shiny app
+#' @export
+period_details_ui <- function(period_index) {
+  tagList(
+    fluidRow(
+      column(4, shiny::icon("calendar-alt"), shiny::textOutput(paste0("date_range_", period_index))),
+      column(4, shiny::icon("sun"), shiny::textOutput(paste0("sunlight_", period_index))),
+      column(4, shiny::icon("cloud-rain"), shiny::textOutput(paste0("precipitation_", period_index))),
+      column(4, shiny::icon("snowflake"), shiny::textOutput(paste0("snow_", period_index))),
+      column(4, shiny::icon("thermometer-half"), shiny::textOutput(paste0("temperature_", period_index))),
+      column(4, shiny::icon("thermometer-full"), shiny::textOutput(paste0("max_temperature_", period_index))),
+      column(4, shiny::icon("thermometer-empty"), shiny::textOutput(paste0("min_temperature_", period_index))),
+      column(4, shiny::icon("wind"), shiny::textOutput(paste0("wind_", period_index)))
+    )
+  )
 }
