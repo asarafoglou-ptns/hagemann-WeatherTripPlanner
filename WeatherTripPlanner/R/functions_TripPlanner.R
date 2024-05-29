@@ -225,6 +225,7 @@ generate_intervals <- function(num_days,
 #' rank_intervals_temp(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring", "warm")
 #' rank_intervals_temp(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "Winter", "cold")
 #' rank_intervals_temp(7, "Milan, Italy", "2024-01-01", "2024-03-01", "Winter", "cold")
+#' @export
 rank_intervals_temp <- function(num_days, 
                                 location, 
                                 start_date = "2014-01-01", 
@@ -259,6 +260,7 @@ rank_intervals_temp <- function(num_days,
 #' rank_intervals_precip(5, "Munich, Germany", "2023-01-10", "2024-05-15", "Spring", "none")
 #' rank_intervals_precip(7, "Amsterdam, Netherlands", "2024-01-01", "2024-01-10", "Winter", "snow")
 #' rank_intervals_precip(7, "Milan, Italy", "2024-01-01", "2024-03-01", "Winter", "rain")
+#' @export
 rank_intervals_precip <- function(num_days, 
                                   location, 
                                   start_date = "2014-01-01", 
@@ -283,4 +285,22 @@ rank_intervals_precip <- function(num_days,
   }
   
   return(ranked_intervals)
+}
+
+
+# helper function for UI for shiny app
+#' @export
+period_details_ui <- function(period_index) {
+  tagList(
+    fluidRow(
+      column(4, shiny::icon("calendar-alt"), shiny::textOutput(paste0("date_range_", period_index))),
+      column(4, shiny::icon("sun"), shiny::textOutput(paste0("sunlight_", period_index))),
+      column(4, shiny::icon("cloud-rain"), shiny::textOutput(paste0("precipitation_", period_index))),
+      column(4, shiny::icon("snowflake"), shiny::textOutput(paste0("snow_", period_index))),
+      column(4, shiny::icon("thermometer-half"), shiny::textOutput(paste0("temperature_", period_index))),
+      column(4, shiny::icon("thermometer-full"), shiny::textOutput(paste0("max_temperature_", period_index))),
+      column(4, shiny::icon("thermometer-empty"), shiny::textOutput(paste0("min_temperature_", period_index))),
+      column(4, shiny::icon("wind"), shiny::textOutput(paste0("wind_", period_index)))
+    )
+  )
 }

@@ -16,5 +16,4 @@ Imports:
     httr,
     jsonlite,
     lubridate,
-    dplyr,
-    shiny
+    dplyr

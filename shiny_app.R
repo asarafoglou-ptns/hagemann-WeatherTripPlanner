@@ -1,26 +1,8 @@
 # enter path to where functions file is stored
-source('/Users/JasminHagemann/Desktop/GitHub/hagemann-WeatherTripPlanner/WeatherTripPlanner/R/functions_TripPlanner.R')
+# source('/Users/JasminHagemann/Desktop/GitHub/hagemann-WeatherTripPlanner/WeatherTripPlanner/R/functions_TripPlanner.R')
 
-# to do:
-# 1) in overview tab: change so that Start.Date and End.Date is displayed as "Start Date" and "End Date"
-# 2) in comparison graph: make weather parameter on y-axis bigger and horizontal and better labeling
-# instead of temperature_max it should be Maximum Temperature
-
-# helper function to define UI for each period details tab
-period_details_ui <- function(period_index) {
-  tagList(
-    fluidRow(
-      column(4, shiny::icon("calendar-alt"), shiny::textOutput(paste0("date_range_", period_index))),
-      column(4, shiny::icon("sun"), shiny::textOutput(paste0("sunlight_", period_index))),
-      column(4, shiny::icon("cloud-rain"), shiny::textOutput(paste0("precipitation_", period_index))),
-      column(4, shiny::icon("snowflake"), shiny::textOutput(paste0("snow_", period_index))),
-      column(4, shiny::icon("thermometer-half"), shiny::textOutput(paste0("temperature_", period_index))),
-      column(4, shiny::icon("thermometer-full"), shiny::textOutput(paste0("max_temperature_", period_index))),
-      column(4, shiny::icon("thermometer-empty"), shiny::textOutput(paste0("min_temperature_", period_index))),
-      column(4, shiny::icon("wind"), shiny::textOutput(paste0("wind_", period_index)))
-    )
-  )
-}
+devtools::install_github("asarafoglou-ptns/hagemann-WeatherTripPlanner/WeatherTripPlanner")
+library("WeatherTripPlanner")
 
 ui <- fluidPage(
   titlePanel("Weather Trip Planner"),
@@ -68,10 +50,10 @@ server <- function(input, output, session) {
     
     if (input$preference == "temp") {
       temp_pref <- input$temp_pref
-      ranked_intervals <- rank_intervals_temp(duration, location, season = season, temp_pref = temp_pref) # WeatherTripPlanner::
+      ranked_intervals <- rank_intervals_temp(duration, location, season = season, temp_pref = temp_pref) 
     } else if (input$preference == "precip") {
       precip_pref <- input$precip_pref
-      ranked_intervals <- rank_intervals_precip(duration, location, season = season, precip_pref = precip_pref) # WeatherTripPlanner::
+      ranked_intervals <- rank_intervals_precip(duration, location, season = season, precip_pref = precip_pref)
     }
     
     top_intervals <- ranked_intervals[1:3]
