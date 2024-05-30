@@ -1,15 +1,32 @@
-# enter path to where functions file is stored
-# source('/Users/JasminHagemann/Desktop/GitHub/hagemann-WeatherTripPlanner/WeatherTripPlanner/R/functions_TripPlanner.R')
+# Script for the shiny app Weather Trip Planner by Jasmin Hagemann
+
+## Please start the application by clicking on "Run App" in the top right corner.
 
 devtools::install_github("asarafoglou-ptns/hagemann-WeatherTripPlanner/WeatherTripPlanner")
 library("WeatherTripPlanner")
 
 ui <- fluidPage(
   titlePanel("Weather Trip Planner"),
+  div(id = "intro_text", 
+      p("Welcome to the Weather Trip Planner!"),
+      p("This application is designed to help you decide the best time for your next trip. 
+        Start by entering the location you want to visit, the season you plan to travel in 
+        - Spring (March until May), Summer (June until August), 
+        Fall (September until November), Winter (December until Feburary) -  
+        and your weather preferences. You can specify your preference for temperature—whether 
+        you prefer it warm or cold—and the app will rank all possible time periods accordingly. 
+        Alternatively, you can select your preference for precipitation 
+        (any kind of frozen or liquid water falling from the sky, such as rain, snow, sleet, or hail). 
+        You can choose whether you prefer rainy, snowy, or dry weather. 
+        If you prefer dry conditions, select 'none.' Continue by entering the 
+        number of days you plan to stay at your destination and click 'Show Best Periods' 
+        to get your results."),
+      p("Bon Voyage!")
+  ),
   sidebarLayout(
     sidebarPanel(
       textInput("location", "Location (City/zip code, Country)"),
-      selectInput("season", "Season", choices = c("Winter", "Spring", "Summer", "Fall")),
+      selectInput("season", "Season", choices = c("Spring", "Summer", "Fall", "Winter")),
       radioButtons("preference", "Preference", choices = list("Temperature" = "temp", "Precipitation" = "precip")),
       conditionalPanel(
         condition = "input.preference == 'temp'",
@@ -24,7 +41,10 @@ ui <- fluidPage(
     ),
     mainPanel(
       tabsetPanel(id = "tabs",
-                  tabPanel("Overview", tableOutput("overview")),
+                  tabPanel("Overview", 
+                           tableOutput("overview"),
+                           uiOutput("overview_text")
+                  ),
                   tabPanel("Period 1", period_details_ui(1)),
                   tabPanel("Period 2", period_details_ui(2)),
                   tabPanel("Period 3", period_details_ui(3)),
@@ -44,6 +64,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   observeEvent(input$submit, {
+    removeUI(selector = "#intro_text")
+    
     location <- input$location
     season <- input$season
     duration <- input$duration
@@ -62,7 +84,16 @@ server <- function(input, output, session) {
       data.frame(
         Period = paste0("Period ", 1:3),
         "Start Date" = sapply(top_intervals, function(x) min(x$date)),
-        "End Date" = sapply(top_intervals, function(x) max(x$date))
+        "End Date" = sapply(top_intervals, function(x) max(x$date)),
+        check.names = FALSE
+      )
+    })
+    
+    output$overview_text <- renderUI({
+      tagList(
+        p("According to the weather data of the last 10 years, these periods best match your weather preferences at your chosen location."),
+        p("To the right, there is a tab for each period where you can see the average values of different weather parameters in more detail."),
+        p("Please note that the start and end dates are in the format mm-dd.")
       )
     })
     
@@ -110,6 +141,10 @@ server <- function(input, output, session) {
     
     output$comparison <- renderPlot({
       selected_params <- input$compare_params
+      
+      validate(
+        need(length(selected_params) > 0, "To visually compare the periods, please select at least one weather parameter.")
+      )
       
       label_mapping <- c(
         "temperature_max" = "Maximum Temperature",
