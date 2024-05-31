@@ -50,10 +50,13 @@ ui <- fluidPage(
                   tabPanel("Period 3", period_details_ui(3)),
                   tabPanel("Comparison",
                            checkboxGroupInput("compare_params", "Select Parameters to Compare", 
-                                              choices = c("Max Temperature" = "temperature_max", "Min Temperature" = "temperature_min", 
-                                                          "Mean Temperature" = "temperature_mean", "Daylight Duration" = "daylight_duration", 
-                                                          "Precipitation" = "precipitation_sum", "Rain" = "rain_sum", 
-                                                          "Snowfall" = "snowfall_sum", "Precipitation Hours" = "precipitation_hours", 
+                                              choices = c("Max Temperature" = "temperature_max", 
+                                                          "Min Temperature" = "temperature_min", 
+                                                          "Mean Temperature" = "temperature_mean", 
+                                                          "Precipitation" = "precipitation_sum", 
+                                                          "Rain" = "rain_sum", 
+                                                          "Snowfall" = "snowfall_sum", 
+                                                          "Precipitation Hours" = "precipitation_hours", 
                                                           "Wind Speed" = "wind_speed_10m_max"),
                                               selected = c("temperature_max", "temperature_min", "temperature_mean")),
                            plotOutput("comparison"))
@@ -109,10 +112,6 @@ server <- function(input, output, session) {
           paste("Date Range:", min(period$date), "to", max(period$date))
         })
         
-        output[[paste0("sunlight_", index)]] <- renderText({
-          paste("Sunlight Duration:", round(mean(period$daylight_duration, na.rm = TRUE), digits = 1), "hours")
-        })
-        
         output[[paste0("temperature_", index)]] <- renderText({
           paste("Average Temperature:", round(mean(period$temperature_mean, na.rm = TRUE), digits = 1), "°C")
         })
@@ -150,7 +149,6 @@ server <- function(input, output, session) {
         "temperature_max" = "Maximum Temperature",
         "temperature_min" = "Minimum Temperature",
         "temperature_mean" = "Mean Temperature",
-        "daylight_duration" = "Daylight Duration",
         "precipitation_sum" = "Precipitation",
         "rain_sum" = "Rain",
         "snowfall_sum" = "Snowfall",

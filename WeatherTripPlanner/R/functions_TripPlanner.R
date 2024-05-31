@@ -294,7 +294,6 @@ period_details_ui <- function(period_index) {
   tagList(
     fluidRow(
       column(4, shiny::icon("calendar-alt"), shiny::textOutput(paste0("date_range_", period_index))),
-      column(4, shiny::icon("sun"), shiny::textOutput(paste0("sunlight_", period_index))),
       column(4, shiny::icon("cloud-rain"), shiny::textOutput(paste0("precipitation_", period_index))),
       column(4, shiny::icon("snowflake"), shiny::textOutput(paste0("snow_", period_index))),
       column(4, shiny::icon("thermometer-half"), shiny::textOutput(paste0("temperature_", period_index))),
